@@ -1,4 +1,4 @@
-version = 8
+version = 14
 name = "scene_switch"
 description = "Scene Switcher app for Hack@Edge"
 authors = ["jrainville+ecp@fastly.com"]

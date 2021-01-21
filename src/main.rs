@@ -14,9 +14,11 @@ use url::{ParseError, Url};
 
 /// The name of a backend server associated with this service.
 ///
-const BACKEND_NAME: &str = "ShastaRain_backend";
+const BACKEND_NAME: &str = "buckley_backend";
 const LOGGING_ENDPOINT: &str = "SceneSwitch_syslog";
 const DICT_NAME: &str = "cut_scenes";
+
+const BASE_URL: &str = "https://storage.googleapis.com/cbuckley-cokepepsi";
 
 /// The entry point for your application.
 ///
@@ -36,18 +38,17 @@ fn main(mut req: Request<Body>) -> Result<impl ResponseExt, Error> {
                 let client_ip = fastly::downstream_client_ip_addr().unwrap();
                 let geo = fastly::geo::geo_lookup(client_ip).unwrap();
                 if geo.country_code() == "US" {
-                    log::debug!("We're in the USA!");
+                    log::debug!("We're in the USA and we like coke!");
                 } else {
-                    log::debug!("We're in: {}", geo.country_code());
+                    log::debug!("We're in: {} and we like pepsi!", geo.country_code());
+                    let mut url = Url::parse(req.uri().to_string().as_ref()).unwrap();
+                    url = url
+                        .join(format!("pepsi_{:02}.ts", segment_num).as_ref())
+                        .unwrap();
+                    let new_uri = url.to_string().parse::<Uri>().unwrap();
+                    *req.uri_mut() = new_uri;
                 }
-                /*
-                let mut url = Url::parse(req.uri().to_string().as_ref()).unwrap();
-                url = url
-                    .join(format!("b.segment_{}.ts", segment_num).as_ref())
-                    .unwrap();
-                let new_uri = url.to_string().parse::<Uri>().unwrap();
-                *req.uri_mut() = new_uri;
-                 */
+
                 Ok(req.send(BACKEND_NAME)?)
             } else {
                 // Not a cut scense so just return.
